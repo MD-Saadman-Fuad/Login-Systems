@@ -102,35 +102,44 @@ const Module5Registration = () => {
       // Simulate OAuth flow
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simulate successful OAuth response
-      const mockUserData = {
-        google: {
-          firstName: 'John',
-          lastName: 'Doe',
-          email: customEmail || 'john.doe@gmail.com',
-          profilePicture: 'https://via.placeholder.com/100?text=JD'
-        },
-        facebook: {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane.smith@facebook.com',
-          profilePicture: 'https://via.placeholder.com/100?text=JS'
-        },
-        github: {
-          firstName: 'Dev',
-          lastName: 'User',
-          email: 'dev.user@github.com',
-          profilePicture: 'https://via.placeholder.com/100?text=DU'
-        },
-        linkedin: {
-          firstName: 'Professional',
-          lastName: 'User',
-          email: 'professional.user@linkedin.com',
-          profilePicture: 'https://via.placeholder.com/100?text=PU'
+      // Generate unique email based on input
+      let userEmail;
+      let firstName = 'User';
+      let lastName = 'Name';
+      
+      if (provider === 'google' && customEmail) {
+        userEmail = customEmail;
+        // Extract name from email if possible
+        const emailPart = customEmail.split('@')[0];
+        if (emailPart.includes('.')) {
+          const nameParts = emailPart.split('.');
+          firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+          lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+        } else {
+          firstName = emailPart.charAt(0).toUpperCase() + emailPart.slice(1);
         }
+      } else if (customLink) {
+        // Generate unique email from profile link
+        const linkPart = customLink.split('/').pop() || `${provider}user${Date.now()}`;
+        userEmail = `${linkPart}@${provider}.com`;
+        firstName = linkPart.charAt(0).toUpperCase() + linkPart.slice(1);
+        lastName = `${provider.charAt(0).toUpperCase() + provider.slice(1)}User`;
+      } else {
+        // Fallback unique email
+        const timestamp = Date.now();
+        userEmail = `${provider}user${timestamp}@${provider}.com`;
+        firstName = `${provider.charAt(0).toUpperCase() + provider.slice(1)}`;
+        lastName = 'User';
+      }
+      
+      // Simulate successful OAuth response with unique data
+      const userData = {
+        firstName: firstName,
+        lastName: lastName,
+        email: userEmail,
+        profilePicture: customLink || 'https://via.placeholder.com/100?text=' + firstName.charAt(0) + lastName.charAt(0),
+        socialLink: customLink || userEmail
       };
-
-      const userData = mockUserData[provider];
       
       // Register with social data
       const registrationData = {
@@ -140,6 +149,7 @@ const Module5Registration = () => {
         email: userData.email,
         socialProvider: provider,
         profilePicture: userData.profilePicture,
+        socialLink: userData.socialLink,
         // Generate a random password for social users
         password: Math.random().toString(36).substring(2, 15)
       };
