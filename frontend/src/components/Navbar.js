@@ -17,6 +17,9 @@ const Navbar = () => {
             MERN Login System
           </Link>
           <div className="navbar-nav">
+            <Link to="/" className="nav-link home-link">
+              🏠 Home
+            </Link>
             {isAuthenticated ? (
               <>
                 <span className="nav-link">Welcome, {user?.firstName}!</span>

@@ -144,6 +144,20 @@ code {
   color: white;
 }
 
+.home-link {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white !important;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.home-link:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
 .text-center {
   text-align: center;
 }
