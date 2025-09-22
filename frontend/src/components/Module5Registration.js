@@ -42,7 +42,59 @@ const Module5Registration = () => {
     }));
   };
 
-  const simulateSocialLogin = async (provider) => {
+  const handleGmailLogin = () => {
+    const gmailAddress = prompt("Please enter your Gmail address:");
+    
+    if (gmailAddress) {
+      if (gmailAddress.includes('@gmail.com')) {
+        // Process the Gmail login
+        simulateSocialLogin('google', gmailAddress);
+      } else {
+        alert("Please enter a valid Gmail address (must contain @gmail.com)");
+      }
+    }
+  };
+
+  const handleFacebookLogin = () => {
+    const facebookLink = prompt("Please enter your Facebook profile link:");
+    
+    if (facebookLink) {
+      if (facebookLink.includes('facebook.com')) {
+        // Process the Facebook login
+        simulateSocialLogin('facebook', null, facebookLink);
+      } else {
+        alert("Please enter a valid Facebook link (must contain facebook.com)");
+      }
+    }
+  };
+
+  const handleGithubLogin = () => {
+    const githubLink = prompt("Please enter your GitHub profile link:");
+    
+    if (githubLink) {
+      if (githubLink.includes('github.com')) {
+        // Process the GitHub login
+        simulateSocialLogin('github', null, githubLink);
+      } else {
+        alert("Please enter a valid GitHub link (must contain github.com)");
+      }
+    }
+  };
+
+  const handleLinkedinLogin = () => {
+    const linkedinLink = prompt("Please enter your LinkedIn profile link:");
+    
+    if (linkedinLink) {
+      if (linkedinLink.includes('linkedin.com')) {
+        // Process the LinkedIn login
+        simulateSocialLogin('linkedin', null, linkedinLink);
+      } else {
+        alert("Please enter a valid LinkedIn link (must contain linkedin.com)");
+      }
+    }
+  };
+
+  const simulateSocialLogin = async (provider, customEmail = null, customLink = null) => {
     setLoadingProvider(provider);
     setMessage('');
     
@@ -55,7 +107,7 @@ const Module5Registration = () => {
         google: {
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john.doe@gmail.com',
+          email: customEmail || 'john.doe@gmail.com',
           profilePicture: 'https://via.placeholder.com/100?text=JD'
         },
         facebook: {
@@ -207,7 +259,7 @@ const Module5Registration = () => {
                   <button
                     type="button"
                     className="social-btn google-btn"
-                    onClick={() => simulateSocialLogin('google')}
+                    onClick={handleGmailLogin}
                     disabled={loadingProvider !== null}
                   >
                     <div className="social-btn-content">
@@ -219,7 +271,7 @@ const Module5Registration = () => {
                           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                         </svg>
                       </div>
-                      <span>Continue with Google</span>
+                      <span>Continue with Gmail</span>
                       {loadingProvider === 'google' && <div className="social-spinner"></div>}
                     </div>
                   </button>
@@ -228,7 +280,7 @@ const Module5Registration = () => {
                   <button
                     type="button"
                     className="social-btn facebook-btn"
-                    onClick={() => simulateSocialLogin('facebook')}
+                    onClick={handleFacebookLogin}
                     disabled={loadingProvider !== null}
                   >
                     <div className="social-btn-content">
@@ -246,7 +298,7 @@ const Module5Registration = () => {
                   <button
                     type="button"
                     className="social-btn github-btn"
-                    onClick={() => simulateSocialLogin('github')}
+                    onClick={handleGithubLogin}
                     disabled={loadingProvider !== null}
                   >
                     <div className="social-btn-content">
@@ -264,7 +316,7 @@ const Module5Registration = () => {
                   <button
                     type="button"
                     className="social-btn linkedin-btn"
-                    onClick={() => simulateSocialLogin('linkedin')}
+                    onClick={handleLinkedinLogin}
                     disabled={loadingProvider !== null}
                   >
                     <div className="social-btn-content">
