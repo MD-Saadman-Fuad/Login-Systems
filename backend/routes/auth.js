@@ -159,7 +159,14 @@ router.post('/register', async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       fullName: user.fullName,
-      registrationModule: user.registrationModule
+      username: user.username,
+      phoneNumber: user.phoneNumber,
+      registrationModule: user.registrationModule,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+      isEmailVerified: user.isEmailVerified,
+      isPhoneVerified: user.isPhoneVerified
     };
 
     res.status(201).json({
@@ -250,7 +257,14 @@ router.post('/login', [
         firstName: user.firstName,
         lastName: user.lastName,
         fullName: user.fullName,
-        registrationModule: user.registrationModule
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+        registrationModule: user.registrationModule,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified
       }
     });
 

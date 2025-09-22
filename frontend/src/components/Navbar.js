@@ -23,9 +23,6 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <span className="nav-link">Welcome, {user?.firstName}!</span>
-                <Link to="/dashboard" className="nav-link">
-                  Dashboard
-                </Link>
                 <button onClick={handleLogout} className="btn btn-secondary">
                   Logout
                 </button>

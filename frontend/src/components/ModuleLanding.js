@@ -65,17 +65,88 @@ const ModuleLanding = () => {
   return (
     <div className="module-landing">
       <div className="container">
-        {/* User Welcome Section - only show when logged in */}
+        {/* User Dashboard Section - only show when logged in */}
         {isAuthenticated && user && (
           <div className="user-welcome-section">
             <div className="welcome-card">
               <div className="welcome-content">
                 <h2>🎉 Welcome back, {user.firstName}!</h2>
-                <div className="unique-id-display">
-                  <span className="id-label">Your Unique ID:</span>
-                  <span className="id-number">#{user.serialNumber}</span>
+                
+                <div className="dashboard-info">
+                  <div className="unique-id-display">
+                    <span className="id-label">Your Unique ID:</span>
+                    <span className="id-number">#{user.serialNumber}</span>
+                  </div>
+                  
+                  <div className="user-details-grid">
+                    <div className="user-detail-item">
+                      <span className="detail-label">👤 Full Name:</span>
+                      <span className="detail-value">{user.firstName} {user.lastName}</span>
+                    </div>
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">📧 Email:</span>
+                      <span className="detail-value">{user.email}</span>
+                    </div>
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">📝 Registration Module:</span>
+                      <span className="detail-value">Module {user.registrationModule}</span>
+                    </div>
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">📅 Member Since:</span>
+                      <span className="detail-value">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        }) : 'N/A'}
+                      </span>
+                    </div>
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">🟢 Account Status:</span>
+                      <span className={`detail-value ${user.isActive ? 'status-active' : 'status-inactive'}`}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">🔐 Last Login:</span>
+                      <span className="detail-value">
+                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : 'First time login'}
+                      </span>
+                    </div>
+                    
+                    {user.phoneNumber && (
+                      <div className="user-detail-item">
+                        <span className="detail-label">📱 Phone:</span>
+                        <span className="detail-value">
+                          {user.phoneNumber}
+                          {user.isPhoneVerified && <span className="verification-badge">✅</span>}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className="user-detail-item">
+                      <span className="detail-label">📧 Email Status:</span>
+                      <span className="detail-value">
+                        {user.isEmailVerified ? (
+                          <span className="status-verified">Verified ✅</span>
+                        ) : (
+                          <span className="status-unverified">Unverified ❌</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p>Registered via Module {user.registrationModule}</p>
               </div>
             </div>
           </div>
