@@ -1497,3 +1497,15 @@
     font-size: 1.2rem;
   }
 }
+
+/* Login Form Specific Styles */
+.login-info {
+  text-align: center;
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}

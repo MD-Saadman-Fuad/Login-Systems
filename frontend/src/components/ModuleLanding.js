@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './ModuleLanding.css';
 
 const ModuleLanding = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   const modules = [
     {
@@ -63,8 +65,24 @@ const ModuleLanding = () => {
   return (
     <div className="module-landing">
       <div className="container">
+        {/* User Welcome Section - only show when logged in */}
+        {isAuthenticated && user && (
+          <div className="user-welcome-section">
+            <div className="welcome-card">
+              <div className="welcome-content">
+                <h2>🎉 Welcome back, {user.firstName}!</h2>
+                <div className="unique-id-display">
+                  <span className="id-label">Your Unique ID:</span>
+                  <span className="id-number">#{user.serialNumber}</span>
+                </div>
+                <p>Registered via Module {user.registrationModule}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="landing-header">
-          <h1>Choose Your Registration Method</h1>
+          <h1>{isAuthenticated ? 'Choose Another Registration Method' : 'Choose Your Registration Method'}</h1>
           <p>Select the registration module that best fits your needs. Each user gets a unique serial number regardless of the chosen method.</p>
         </div>
 

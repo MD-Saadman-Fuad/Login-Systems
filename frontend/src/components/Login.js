@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import './ModuleRegistration.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/');  // Navigate to landing page instead of dashboard
     }
   }, [isAuthenticated, navigate]);
 
@@ -34,7 +35,7 @@ const Login = () => {
     const result = await login(formData);
     
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/');  // Navigate to landing page to show unique ID
     } else {
       setMessage(result.message);
     }
@@ -43,9 +44,12 @@ const Login = () => {
   };
 
   return (
-    <div className="container">
-      <div className="form-container">
-        <h2 className="text-center">Login</h2>
+    <div className="registration-container">
+      <div className="registration-card">
+        <div className="module-header">
+          <h2>🔐 Welcome Back</h2>
+          <p>Sign in to access your account</p>
+        </div>
         
         {message && (
           <div className={`alert ${message.includes('successful') ? 'alert-success' : 'alert-error'}`}>
@@ -53,22 +57,22 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="registration-form">
           <div className="form-group">
-            <label htmlFor="login">Username or Email:</label>
+            <label htmlFor="login">Email Address</label>
             <input
-              type="text"
+              type="email"
               id="login"
               name="login"
               value={formData.login}
               onChange={handleChange}
               required
-              placeholder="Enter your username or email"
+              placeholder="Enter your email address"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password:</label>
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -82,16 +86,16 @@ const Login = () => {
 
           <button 
             type="submit" 
-            className="btn btn-full"
+            className="submit-btn"
             disabled={isLoading}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="text-center mt-2">
-          <p>
-            Don't have an account? <Link to="/register">Register here</Link>
+        <div className="module-footer">
+          <p className="login-info">
+            💡 Use the email and password from any registration module
           </p>
         </div>
       </div>
