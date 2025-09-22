@@ -23,9 +23,7 @@ const Module3Registration = () => {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    companyName: '',
-    jobTitle: ''
+    confirmPassword: ''
   });
 
   const handleChange = (e) => {
@@ -118,9 +116,7 @@ const Module3Registration = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        password: formData.password,
-        companyName: formData.companyName || undefined,
-        jobTitle: formData.jobTitle || undefined
+        password: formData.password
       };
 
       const response = await authAPI.register(registrationData);
@@ -148,7 +144,7 @@ const Module3Registration = () => {
         <div className="registration-card">
           <div className="registration-header">
             <h2>Module 3: Professional Registration</h2>
-            <p>Quick professional account setup for business users</p>
+            <p>Streamlined registration with essential information only</p>
           </div>
 
           <form onSubmit={handleSubmit} className="registration-form">
@@ -210,36 +206,6 @@ const Module3Registration = () => {
                   required
                   placeholder="your.name@company.com"
                 />
-              </div>
-            </div>
-
-            {/* Optional Professional Details */}
-            <div className="form-section">
-              <h3>🏢 Professional Details (Optional)</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="companyName">Company Name</label>
-                  <input
-                    type="text"
-                    id="companyName"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    placeholder="Your company name"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="jobTitle">Job Title</label>
-                  <input
-                    type="text"
-                    id="jobTitle"
-                    name="jobTitle"
-                    value={formData.jobTitle}
-                    onChange={handleChange}
-                    placeholder="Your job title"
-                  />
-                </div>
               </div>
             </div>
 
