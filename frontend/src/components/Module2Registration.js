@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { usePreRegistration } from '../context/PreRegistrationContext';
 import './ModuleRegistration.css';
 
 const Module2Registration = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { preRegData } = usePreRegistration();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -111,196 +114,200 @@ const Module2Registration = () => {
     try {
       const registrationData = {
         registrationModule: 2,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        password: formData.password
+        ...preRegData,
+        ...formData,
       };
 
-      const response = await authAPI.register(registrationData);
+      const { success, message: apiMessage, user } = await register(registrationData);
 
-      if (response.data.success) {
+      if (success && user) {
         navigate('/welcome', { 
           state: { 
-            serialNumber: response.data.user.serialNumber,
-            module: 2 
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.firstName 
           } 
         });
+      } else {
+        setMessage(apiMessage || 'Registration failed to return user data.');
+        generateCaptcha(); // Regenerate captcha on failure
       }
     } catch (error) {
       console.error('Registration error:', error);
       const errorMessage = error.response?.data?.message || 'Registration failed';
       setMessage(errorMessage);
+      generateCaptcha(); // Regenerate captcha on error
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="registration-container">
-      <div className="registration-card">
-        <div className="registration-header">
-          <h2>Module 2: Basic Registration</h2>
-          <p>Simple registration with CAPTCHA verification</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="registration-form">
-          {message && (
-            <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
-              {message}
-            </div>
-          )}
-
-          {errors.length > 0 && (
-            <div className="alert alert-error">
-              <ul>
-                {errors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First Name *</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                placeholder="Enter your first name"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name *</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                placeholder="Enter your last name"
-              />
-            </div>
+    <div className="module-registration">
+      <div className="registration-container">
+        <div className="registration-card">
+          <div className="registration-header">
+            <h2>Module 2: Basic Registration</h2>
+            <p>Simple registration with CAPTCHA verification</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email Address *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email address"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="registration-form">
+            {message && (
+              <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
+                {message}
+              </div>
+            )}
 
-          <div className="form-group">
-            <label htmlFor="phoneNumber">Phone Number *</label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              placeholder="Enter your phone number"
-            />
-          </div>
+            {errors.length > 0 && (
+              <div className="alert alert-error">
+                <ul>
+                  {errors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="password">Password *</label>
-              <div className="password-input-container">
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="firstName">First Name *</label>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={formData.password}
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleChange}
                   required
-                  placeholder="Enter password (min 6 characters)"
+                  placeholder="Enter your first name"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? '👁️‍🗨️' : '👁️'}
-                </button>
               </div>
-              <small className="form-text">Minimum 6 characters required</small>
+
+              <div className="form-group">
+                <label htmlFor="lastName">Last Name *</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your last name"
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password *</label>
+              <label htmlFor="email">Email Address *</label>
               <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="Confirm your password"
+                placeholder="Enter your email address"
               />
             </div>
-          </div>
 
-          {/* CAPTCHA Section */}
-          <div className="form-group captcha-group">
-            <label htmlFor="captchaAnswer">Security Verification (CAPTCHA) *</label>
-            <div className="captcha-container">
-              <div className="captcha-question">
-                <span className="captcha-text">What is {captcha.question} ?</span>
-                <button
-                  type="button"
-                  className="captcha-refresh"
-                  onClick={generateCaptcha}
-                  title="Generate new CAPTCHA"
-                >
-                  🔄
-                </button>
+            <div className="form-group">
+              <label htmlFor="phoneNumber">Phone Number *</label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
+                placeholder="Enter your phone number"
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="password">Password *</label>
+                <div className="password-input">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter password (min 6 characters)"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? '�' : '👁️'}
+                  </button>
+                </div>
+                <small className="form-text">Minimum 6 characters required</small>
               </div>
-              <input
-                type="number"
-                id="captchaAnswer"
-                name="captchaAnswer"
-                value={captcha.userAnswer}
-                onChange={handleChange}
-                required
-                placeholder="Enter the answer"
-                className="captcha-input"
-              />
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password *</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm your password"
+                />
+              </div>
             </div>
-            <small className="form-text">Solve the math problem above</small>
-          </div>
 
-          <button 
-            type="submit" 
-            className={`submit-btn ${isLoading ? 'loading' : ''}`}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-          </button>
+            {/* CAPTCHA Section */}
+            <div className="form-group captcha-group">
+              <label htmlFor="captchaAnswer">Security Verification (CAPTCHA) *</label>
+              <div className="captcha-container">
+                <div className="captcha-question">
+                  <span className="captcha-text">What is {captcha.question} ?</span>
+                  <button
+                    type="button"
+                    className="captcha-refresh"
+                    onClick={generateCaptcha}
+                    title="Generate new CAPTCHA"
+                  >
+                    🔄
+                  </button>
+                </div>
+                <input
+                  type="number"
+                  id="captchaAnswer"
+                  name="captchaAnswer"
+                  value={captcha.userAnswer}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter the answer"
+                  className="captcha-input"
+                />
+              </div>
+              <small className="form-text">Solve the math problem above</small>
+            </div>
 
-          <div className="form-footer">
             <button 
-              type="button" 
-              className="back-btn"
-              onClick={() => navigate('/')}
+              type="submit" 
+              className={`submit-btn ${isLoading ? 'loading' : ''}`}
+              disabled={isLoading}
             >
-              ← Back to Module Selection
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
-          </div>
-        </form>
+
+            <div className="form-footer">
+              <button 
+                type="button" 
+                className="back-btn"
+                onClick={() => navigate('/')}
+              >
+                ← Back to Module Selection
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

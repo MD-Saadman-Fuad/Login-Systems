@@ -32,7 +32,7 @@ router.post('/register', async (req, res) => {
     const { registrationModule, ...userData } = req.body;
 
     // Validate module number
-    if (!registrationModule || registrationModule < 1 || registrationModule > 6) {
+    if (!registrationModule || registrationModule < 1 || registrationModule > 7) {
       return res.status(400).json({ 
         success: false,
         message: 'Invalid registration module' 
@@ -51,30 +51,32 @@ router.post('/register', async (req, res) => {
     // Generate serial number
     const serialNumber = await User.generateSerialNumber();
 
-    // Prepare user data based on module
+    // Prepare user data, including accessibility fields for all modules
     const newUserData = {
       serialNumber,
       registrationModule,
       email: userData.email,
-      ...userData
+      ...userData,
+      age: userData.age || null,
+      isDisabled: userData.isDisabled || false,
+      isColorblind: userData.isColorblind || false,
     };
+
+    if (newUserData.isDisabled) {
+      newUserData.disabilityType = userData.disabilityType || 'Not specified';
+    } else {
+      // Ensure disabilityType is not set if user is not disabled
+      delete newUserData.disabilityType;
+    }
 
     // Module-specific field mapping
     switch (registrationModule) {
       case 1:
-        // Complete Profile - all fields
+        // Complete Profile - all fields are already in userData
         break;
       case 2:
-        // Basic Registration - map fullName to firstName/lastName
-        if (userData.fullName) {
-          const names = userData.fullName.split(' ');
-          newUserData.firstName = names[0];
-          newUserData.lastName = names.slice(1).join(' ') || '';
-          delete newUserData.fullName;
-        }
-        break;
       case 3:
-        // Professional - map fullName to firstName/lastName
+        // Basic & Professional - map fullName to firstName/lastName
         if (userData.fullName) {
           const names = userData.fullName.split(' ');
           newUserData.firstName = names[0];
@@ -83,7 +85,7 @@ router.post('/register', async (req, res) => {
         }
         break;
       case 4:
-        // Email Focused - minimal data
+        // Email Focused - minimal data, already handled
         break;
       case 5:
         // Social Login - store social provider information
@@ -93,19 +95,9 @@ router.post('/register', async (req, res) => {
           newUserData.profilePicture = userData.profilePicture;
           
           // Store provider-specific ID
-          switch (userData.socialProvider) {
-            case 'google':
-              newUserData.googleId = userData.socialId || `google_${Date.now()}`;
-              break;
-            case 'facebook':
-              newUserData.facebookId = userData.socialId || `facebook_${Date.now()}`;
-              break;
-            case 'github':
-              newUserData.githubId = userData.socialId || `github_${Date.now()}`;
-              break;
-            case 'linkedin':
-              newUserData.linkedinId = userData.socialId || `linkedin_${Date.now()}`;
-              break;
+          const providerIdField = `${userData.socialProvider}Id`;
+          if (User.schema.path(providerIdField)) {
+            newUserData[providerIdField] = userData.socialId || `${userData.socialProvider}_${Date.now()}`;
           }
           
           // For social login, automatically verify email
@@ -135,6 +127,7 @@ router.post('/register', async (req, res) => {
           newUserData.isPhoneVerified = true;
         }
         break;
+      // Case 7 is no longer needed as accessibility fields are handled globally
     }
 
     // Create new user
@@ -166,7 +159,11 @@ router.post('/register', async (req, res) => {
       createdAt: user.createdAt,
       lastLogin: user.lastLogin,
       isEmailVerified: user.isEmailVerified,
-      isPhoneVerified: user.isPhoneVerified
+      isPhoneVerified: user.isPhoneVerified,
+      age: user.age,
+      isDisabled: user.isDisabled,
+      disabilityType: user.disabilityType,
+      isColorblind: user.isColorblind
     };
 
     res.status(201).json({
@@ -264,7 +261,11 @@ router.post('/login', [
         createdAt: user.createdAt,
         lastLogin: user.lastLogin,
         isEmailVerified: user.isEmailVerified,
-        isPhoneVerified: user.isPhoneVerified
+        isPhoneVerified: user.isPhoneVerified,
+        age: user.age,
+        isDisabled: user.isDisabled,
+        disabilityType: user.disabilityType,
+        isColorblind: user.isColorblind
       }
     });
 

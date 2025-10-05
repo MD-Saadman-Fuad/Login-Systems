@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       setIsAuthenticated(true);
       
-      return { success: true, message: response.data.message };
+      return { success: true, message: response.data.message, user };
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
       return { success: false, message };

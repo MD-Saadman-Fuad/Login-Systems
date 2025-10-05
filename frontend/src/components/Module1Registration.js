@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { usePreRegistration } from '../context/PreRegistrationContext';
 import './ModuleRegistration.css';
 
 const Module1Registration = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { preRegData } = usePreRegistration();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -118,26 +121,22 @@ const Module1Registration = () => {
     try {
       const registrationData = {
         registrationModule: 1,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
-        gender: formData.gender,
-        dateOfBirth: formData.dateOfBirth,
-        password: formData.password
+        ...preRegData, // Include data from the landing page
+        ...formData,
       };
 
-      const response = await authAPI.register(registrationData);
+      const { success, message: apiMessage, user } = await register(registrationData);
       
-      if (response.data.success) {
+      if (success && user) {
         navigate('/welcome', { 
           state: { 
-            serialNumber: response.data.user.serialNumber,
-            module: 1,
-            userName: `${formData.firstName} ${formData.lastName}`
-          }
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.firstName || user.username 
+          } 
         });
+      } else {
+        setMessage(apiMessage || 'Registration failed to return user data.');
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Registration failed';

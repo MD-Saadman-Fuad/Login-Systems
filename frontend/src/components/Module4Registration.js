@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { usePreRegistration } from '../context/PreRegistrationContext';
 import './ModuleRegistration.css';
 
 const Module4Registration = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { preRegData } = usePreRegistration();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -120,19 +123,22 @@ const Module4Registration = () => {
     try {
       const registrationData = {
         registrationModule: 4,
-        email: formData.email,
-        password: formData.password
+        ...preRegData,
+        ...formData,
       };
 
-      const response = await authAPI.register(registrationData);
+      const { success, message: apiMessage, user } = await register(registrationData);
 
-      if (response.data.success) {
+      if (success && user) {
         navigate('/welcome', { 
           state: { 
-            serialNumber: response.data.user.serialNumber,
-            module: 4 
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.email 
           } 
         });
+      } else {
+        setMessage(apiMessage || 'Registration failed to return user data.');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -253,7 +259,7 @@ const Module4Registration = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="password">Selected Password *</label>
-                  <div className="password-input-container">
+                  <div className="password-input">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       id="password"
@@ -269,7 +275,7 @@ const Module4Registration = () => {
                       className="password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? '👁️‍🗨️' : '👁️'}
+                      {showPassword ? '�' : '👁️'}
                     </button>
                   </div>
                   <small className="form-text">Must be exactly 6 characters</small>

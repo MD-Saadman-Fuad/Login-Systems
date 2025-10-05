@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { usePreRegistration } from '../context/PreRegistrationContext';
 import './ModuleRegistration.css';
 
 const Module5Registration = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { preRegData } = usePreRegistration();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState([]);
@@ -146,6 +149,7 @@ const Module5Registration = () => {
       // Register with social data
       const registrationData = {
         registrationModule: 5,
+        ...preRegData,
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
@@ -156,17 +160,18 @@ const Module5Registration = () => {
         password: Math.random().toString(36).substring(2, 15)
       };
 
-      const response = await authAPI.register(registrationData);
+      const { success, message: apiMessage, user } = await register(registrationData);
 
-      if (response.data.success) {
+      if (success && user) {
         navigate('/welcome', { 
           state: { 
-            serialNumber: response.data.user.serialNumber,
-            module: 5,
-            socialProvider: provider,
-            userName: `${userData.firstName} ${userData.lastName}`
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.firstName 
           } 
         });
+      } else {
+        setMessage(apiMessage || 'Registration failed to return user data.');
       }
     } catch (error) {
       console.error('Social login error:', error);
@@ -205,23 +210,23 @@ const Module5Registration = () => {
     try {
       const registrationData = {
         registrationModule: 5,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
+        ...preRegData,
+        ...formData,
         socialProvider: 'manual'
       };
 
-      const response = await authAPI.register(registrationData);
+      const { success, message: apiMessage, user } = await register(registrationData);
 
-      if (response.data.success) {
+      if (success && user) {
         navigate('/welcome', { 
           state: { 
-            serialNumber: response.data.user.serialNumber,
-            module: 5,
-            socialProvider: 'manual'
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.firstName 
           } 
         });
+      } else {
+        setMessage(apiMessage || 'Registration failed to return user data.');
       }
     } catch (error) {
       console.error('Registration error:', error);

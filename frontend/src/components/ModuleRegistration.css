@@ -1509,3 +1509,72 @@
   border-radius: 6px;
   border-left: 4px solid #667eea;
 }
+
+/* Custom Checkbox Styles */
+.form-group .checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: #4a5568;
+  position: relative;
+  user-select: none;
+  pointer-events: all; /* Ensure the label is clickable */
+}
+
+.form-group input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.checkbox-custom {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #cbd5e0;
+  border-radius: 6px;
+  margin-right: 12px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.checkbox-custom::after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.form-group input[type="checkbox"]:checked ~ .checkbox-custom {
+  background-color: #667eea;
+  border-color: #667eea;
+  animation: check-pop 0.3s ease-in-out;
+}
+
+.form-group input[type="checkbox"]:checked ~ .checkbox-custom::after {
+  display: block;
+}
+
+.form-group input[type="checkbox"]:focus ~ .checkbox-custom {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Floating label effect */
+.form-group {
+  position: relative;
+}

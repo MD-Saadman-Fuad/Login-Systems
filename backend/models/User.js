@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 1,
-    max: 6
+    max: 7
   },
   email: {
     type: String,
@@ -63,6 +63,23 @@ const userSchema = new mongoose.Schema({
   },
   dateOfBirth: {
     type: Date
+  },
+
+  // Module 7: Accessibility fields
+  age: {
+    type: Number
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false
+  },
+  disabilityType: {
+    type: String,
+    trim: true
+  },
+  isColorblind: {
+    type: Boolean,
+    default: false
   },
   
   // Social login fields

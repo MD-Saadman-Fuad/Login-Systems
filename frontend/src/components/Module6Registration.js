@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { usePreRegistration } from '../context/PreRegistrationContext';
 import './ModuleRegistration.css';
 
 const Module6Registration = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { preRegData } = usePreRegistration();
   const [step, setStep] = useState(1); // 1: Registration, 2: OTP Verification
   const [formData, setFormData] = useState({
     email: '',
@@ -160,32 +164,30 @@ const Module6Registration = () => {
       }
 
       // Register user after OTP verification
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          registrationModule: 6,
-          otp: enteredOtp,
-          isOtpVerified: true
-        }),
-      });
+      const registrationData = {
+        registrationModule: 6,
+        ...preRegData,
+        ...formData,
+        otp: enteredOtp,
+        isOtpVerified: true
+      };
 
-      const data = await response.json();
+      const { success, message, user } = await register(registrationData);
 
-      if (response.ok) {
+      if (success && user) {
         // Clear OTP from storage
         sessionStorage.removeItem('currentOtp');
         sessionStorage.removeItem('otpExpiry');
         
-        // Store token and navigate to welcome page
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('serialNumber', data.user.serialNumber);
-        navigate('/welcome');
+        navigate('/welcome', { 
+          state: { 
+            serialNumber: user.serialNumber, 
+            module: user.registrationModule,
+            userName: user.email 
+          } 
+        });
       } else {
-        setError(data.message || 'Registration failed');
+        setError(message || 'Registration failed');
       }
     } catch (error) {
       setError('Network error. Please try again.');
@@ -207,134 +209,136 @@ const Module6Registration = () => {
   };
 
   return (
-    <div className="registration-container">
-      <div className="registration-card">
-        <div className="module-header">
-          <h2>Module 6: OTP Verification</h2>
-          <p>Secure registration with SMS/Email verification</p>
-        </div>
+    <div className="module-registration">
+      <div className="registration-container">
+        <div className="registration-card">
+          <div className="registration-header">
+            <h2>Module 6: OTP Verification</h2>
+            <p>Secure registration with SMS/Email verification</p>
+          </div>
 
-        {step === 1 ? (
-          // Step 1: Registration Form
-          <form onSubmit={handleRegistration} className="registration-form">
-            <div className="form-group">
-              <label htmlFor="email">Email Address *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="phoneNumber">Phone Number *</label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Enter 10-digit phone number"
-                maxLength="10"
-                pattern="[0-9]{10}"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Password *</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Enter password (min 6 characters)"
-                minLength="6"
-                required
-              />
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            <button 
-              type="submit" 
-              className="submit-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Sending OTP...' : 'Send OTP & Continue'}
-            </button>
-          </form>
-        ) : (
-          // Step 2: OTP Verification
-          <div className="otp-verification">
-            <div className="otp-info">
-              <h3>Enter Verification Code</h3>
-              <p>We've sent a 6-digit code to:</p>
-              <p><strong>{formData.phoneNumber}</strong> & <strong>{formData.email}</strong></p>
-              <p className="timer">Time remaining: <span className="countdown">{formatTime(otpTimer)}</span></p>
-            </div>
-
-            <form onSubmit={handleOtpVerification} className="otp-form">
-              <div className="otp-inputs">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    type="text"
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="otp-input"
-                    maxLength="1"
-                    pattern="[0-9]"
-                  />
-                ))}
+          {step === 1 ? (
+            // Step 1: Registration Form
+            <form onSubmit={handleRegistration} className="registration-form">
+              <div className="form-group">
+                <label htmlFor="email">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  required
+                />
               </div>
 
-              {error && <div className="error-message">{error}</div>}
+              <div className="form-group">
+                <label htmlFor="phoneNumber">Phone Number *</label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter 10-digit phone number"
+                  maxLength="10"
+                  pattern="[0-9]{10}"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password *</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter password (min 6 characters)"
+                  minLength="6"
+                  required
+                />
+              </div>
+
+              {error && <div className="alert alert-error">{error}</div>}
 
               <button 
                 type="submit" 
-                className="submit-btn"
-                disabled={isLoading || otp.join('').length !== 6}
+                className={`submit-btn ${isLoading ? 'loading' : ''}`}
+                disabled={isLoading}
               >
-                {isLoading ? 'Verifying...' : 'Verify & Complete Registration'}
+                {isLoading ? 'Sending OTP...' : 'Send OTP & Continue'}
               </button>
-
-              <div className="otp-actions">
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  className="resend-btn"
-                  disabled={!canResendOtp || isLoading}
-                >
-                  {canResendOtp ? 'Resend OTP' : 'Resend OTP'}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="back-btn"
-                >
-                  Back to Form
-                </button>
-              </div>
             </form>
-          </div>
-        )}
+          ) : (
+            // Step 2: OTP Verification
+            <div className="otp-verification">
+              <div className="otp-info">
+                <h3>Enter Verification Code</h3>
+                <p>We've sent a 6-digit code to:</p>
+                <p><strong>{formData.phoneNumber}</strong> & <strong>{formData.email}</strong></p>
+                <p className="timer">Time remaining: <span className="countdown">{formatTime(otpTimer)}</span></p>
+              </div>
 
-        <div className="module-footer">
-          <button 
-            onClick={() => navigate('/')} 
-            className="back-home-btn"
-          >
-            ← Back to Home
-          </button>
+              <form onSubmit={handleOtpVerification} className="otp-form">
+                <div className="otp-inputs">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      className="otp-input"
+                      maxLength="1"
+                      pattern="[0-9]"
+                    />
+                  ))}
+                </div>
+
+                {error && <div className="alert alert-error">{error}</div>}
+
+                <button 
+                  type="submit" 
+                  className={`submit-btn ${isLoading ? 'loading' : ''}`}
+                  disabled={isLoading || otp.join('').length !== 6}
+                >
+                  {isLoading ? 'Verifying...' : 'Verify & Complete Registration'}
+                </button>
+
+                <div className="otp-actions">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    className="resend-btn"
+                    disabled={!canResendOtp || isLoading}
+                  >
+                    {canResendOtp ? 'Resend OTP' : 'Resend OTP'}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="back-btn"
+                  >
+                    Back to Form
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="form-footer">
+            <button 
+              onClick={() => navigate('/')} 
+              className="back-btn"
+            >
+              ← Back to Module Selection
+            </button>
+          </div>
         </div>
       </div>
     </div>
